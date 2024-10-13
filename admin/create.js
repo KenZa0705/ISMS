@@ -1,3 +1,8 @@
+document.getElementById('file-upload-btn').addEventListener('click', function(event) {
+    event.preventDefault();  // Prevent form submission when clicking the upload button
+    document.getElementById('image').click();  // Trigger file input click
+});
+
 function imagePreview() {
     const input = document.getElementById('image');
     const preview = document.getElementById('image-preview');

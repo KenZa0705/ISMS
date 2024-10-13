@@ -20,7 +20,7 @@ $department_id = $_SESSION['user']['department_id'];
 <html lang="en">
 
 <head>
-    <title>Title</title>
+    <title>ISMS Portal</title>
     <meta charset="utf-8" />
     <meta
         name="viewport"
@@ -33,52 +33,13 @@ $department_id = $_SESSION['user']['department_id'];
 
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg bg-white text-black fixed-top mb-5">
-            <div class="container">
-                <div class="user-left d-flex">
-                    <div class="d-md-none ms-0 mt-2 me-3">
-                        <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
-                    </div>
-
-                    <a class="navbar-brand d-flex align-items-center" href="#"><img src="img/brand.png" class="img-fluid branding" alt=""></a>
-                </div>
-
-                <div class="user-right d-flex align-items-center justify-content-center">
-                    <p class="username d-flex align-items-center m-0"><?php echo $first_name ?></p>
-                    <div class="user-profile">
-                        <div class="dropdown">
-                            <button class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" style="border: none; background: none; padding: 0;">
-                                <img class="img-fluid w-100" src="img/test pic.jpg" alt="">
-                            </button>
-                            <ul class="dropdown-menu mt-3" style="left: auto; right:1px;">
-                                <li><a class="dropdown-item text-center" href="#">Settings</a></li>
-                                <li><a class="dropdown-item text-center" onclick="alert('Logged Out Successfully')" href="../login/logout.php">Logout</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-        </nav>
+        <?php include '../cdn/navbar.php'?>
     </header>
     <main>
         <div class="container pt-5">
             <div class="row g-4">
                 <!-- left sidebar -->
-                <div class="col-md-3 d-none d-md-block">
-                    <div class="sticky-sidebar pt-5">
-                        <div class="sidebar">
-                            <div class="card">
-                                <div class="card-body d-flex flex-column">
-                                    <a href="admin.php" class="btn active mb-3"><i class="bi bi-house"></i> Home</a>
-                                    <a class="btn mb-3" href="create.php"><i class="bi bi-megaphone"></i> Create Announcement</a>
-                                    <a class="btn mb-3" href="manage.php"><i class="bi bi-kanban"></i> Manage Post</a>
-                                    <a class="btn" href=""><i class="bi bi-clipboard"></i> Logs</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <?php include '../cdn/sidebar.php'; ?>
                  <!-- main content -->
                 <div class="col-md-6 pt-5 px-5">
                     <div class="feed-container">
@@ -109,74 +70,75 @@ $department_id = $_SESSION['user']['department_id'];
                     </div>
                 </div>
                 <?php
+                require_once '../login/dbh.inc.php';
                 // Assuming you have already connected to the database
                 try {
                     // Query to get the announcements
-                    $query = "SELECT a.announcement_id, a.title, a.description, d.department_name AS department, c.year_level, a.admin_id, a.image, a.updated_at, s.first_name AS admin_name
-                            FROM announcement a
-                            JOIN admin s ON a.admin_id = s.admin_id
-                            JOIN year_level c ON a.year_level_id = c.year_level_id
-                            JOIN department d ON a.department_id = d.department_id
-                            ORDER BY a.updated_at DESC"; // You can modify the ORDER BY as per your requirement
+                    $query = "SELECT * FROM announcement ORDER BY updated_at DESC"; // You can modify the ORDER BY as per your requirement
                     // Prepare and execute the query
                     $stmt = $pdo->prepare($query);
                     $stmt->execute();
-
+                    
                     // Fetch all the results
                     $announcements = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    if ($announcements > 0) {
+                        // Loop through the announcements and display them
+                        foreach ($announcements as $row) {
+                            $announcement_id = $row['announcement_id'];
+                            $title = $row['title'];
+                            $description = $row['description'];
+                            $image = $row['image'];
+                            $admin_id = $row['admin_id'];
+                            $department = $row['department_id'];
+                            $year_level = $row['year_level_id'];
+                            $updated_at = date('F d, Y', strtotime($row['updated_at']));
+                            ?>
 
-                    // Loop through the announcements and display them
-                    foreach ($announcements as $row) {
-                        $announcement_id = $row['a.announcement_id'];
-                        $title = $row['a.title'];
-                        $description = $row['a.description'];
-                        $image = $row['a.image'];
-                        $admin_name = $row['admin_name'];
-                        $department = $row['department'];
-                        $year_level = $row['c.year_level'];
-                        $updated_at = date('F d, Y', strtotime($row['a.updated_at'])); // Format the date
-                        ?>
-
-                        <div class="col-md-6 pt-5 px-5">
-                                    <div class="feed-container">
-                                        <div class="card mb-3">
-                                            <div class="profile-container d-flex px-3 pt-3">
-                                                <div class="profile-pic">
-                                                    <img class="img-fluid" src="path/to/profile/pic.jpg" alt=""> <!-- Profile image can be dynamic if available -->
-                                                </div>
-                                                <p class="ms-1 mt-1"><?php echo htmlspecialchars($admin_name); ?></p>
-                                                <div class="dropdown-edit d-flex ms-auto">
-                                                    <a href=""><i class="bi bi-three-dots"></i></a>
-                                                </div>
+                            <div class="col-md-6 pt-5 px-5">
+                                <div class="feed-container">
+                                    <div class="card mb-3">
+                                        <div class="profile-container d-flex px-3 pt-3">
+                                            <div class="profile-pic">
+                                                <img class="img-fluid" src="path/to/profile/pic.jpg" alt=""> <!-- Profile image can be dynamic if available -->
                                             </div>
-
-                                            <div class="image-container pb-3 mx-3">
-                                                <img src="uploads/<?php echo htmlspecialchars($image); ?>" alt="Post Image" class="img-fluid"> <!-- Dynamically display post image -->
+                                            <p class="ms-1 mt-1"><?php echo htmlspecialchars($admin_id); ?></p>
+                                            <div class="dropdown ms-auto">
+                                                <a href="#" id="dropdownMenuButton<?php echo $announcement_id; ?>" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="bi bi-three-dots"></i>
+                                                </a>
+                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton<?php echo $announcement_id; ?>">
+                                                    <li><a class="dropdown-item" href="edit_announcement.php?id=<?php echo $announcement_id; ?>">Edit</a></li>
+                                                    <li><a class="dropdown-item text-danger" href="delete_announcement.php?id=<?php echo $announcement_id; ?>" onclick="return confirm('Are you sure you want to delete this announcement?')">Delete</a></li>
+                                                </ul>
                                             </div>
+                                        </div>
 
-                                            <div class="card-body">
-                                                <h5 class="card-title"><?php echo htmlspecialchars($title); ?></h5>
-                                                <p><?php echo htmlspecialchars($description); ?></p>
-                                                <p class="card-text">
-                                                    Tags: <?php echo htmlspecialchars($year_level), htmlspecialchars($department); ?>
-                                                </p>
-                                                <small>Updated at <?php echo htmlspecialchars($updated_at); ?></small>
-                                            </div>
+                                        <div class="image-container pb-3 mx-3">
+                                            <img src="uploads/<?php echo htmlspecialchars($image); ?>" alt="Post Image" class="img-fluid"> <!-- Dynamically display post image -->
+                                        </div>
+
+                                        <div class="card-body">
+                                            <h5 class="card-title"><?php echo htmlspecialchars($title); ?></h5>
+                                            <p><?php echo htmlspecialchars($description); ?></p>
+                                            <p class="card-text">
+                                                Tags: <?php echo htmlspecialchars($year_level), htmlspecialchars($department); ?>
+                                            </p>
+                                            <small>Updated at <?php echo htmlspecialchars($updated_at); ?></small>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                <?php
-
-                        } 
-                    } catch (PDOException $e) {
-                            // Handle any errors that occur during query execution
-                            echo "Error: " . $e->getMessage();
+                            <?php
+                        }
+                    } else {
+                        echo '<p>No announcements found.</p>';
+                    }
+                } catch (PDOException $e) {
+                    // Handle any errors that occur during query execution
+                    echo "Error: " . $e->getMessage();
                 }
                 ?>
-
-
-               
 
                 <div class="col-md-3 d-none d-md-block">
                     <div class="sticky-sidebar pt-5">

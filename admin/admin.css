@@ -30,6 +30,7 @@ body {
 .sticky-sidebar{
     position: sticky;
     top: 50px;
+    height: 100vh;
 }
 
 .feed-container {
